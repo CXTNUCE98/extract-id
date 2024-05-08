@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     baseURL: '/',
   },
   devtools: { enabled: true },
-  modules: ['@vueuse/nuxt', "@nuxtjs/tailwindcss", '@element-plus/nuxt'],
+  modules: ['@vueuse/nuxt', "@nuxtjs/tailwindcss", '@element-plus/nuxt', '@unocss/nuxt'],
   postcss: {
     plugins: {
       tailwindcss: {},
