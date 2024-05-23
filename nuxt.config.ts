@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   imports: {
     dirs: [
       'constants',
+      'composables',
     ],
   },
   app: {

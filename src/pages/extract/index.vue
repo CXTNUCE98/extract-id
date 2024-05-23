@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import axios from 'axios'
+// import axios from 'axios'
+import useFileList from "~/composables/file-list"
+import createUploader from "~/composables/file-uploader"
 
-// Đường dẫn URL của API
-const apiUrl = 'http://localhost:9000/upload-file/';
-const imageUrl = ref('');
+// const apiUrl = 'http://localhost:9000/upload-file/';
+// const imageUrl = ref('');
 const imgUrl = ref()
 const cardInfo = ref({
     Address: "",
@@ -15,54 +16,53 @@ const cardInfo = ref({
     Nationality: "",
     Sex: "",
 })
-function extractId() {
+// function extractId() {
+//     console.log('imgUrl: ', imgUrl)
+//     axios.post(apiUrl, { file: imgUrl.value }, {
+//         headers: {
+//             "Content-Type": "multipart/form-data",
+//         },
+//     })
+//         .then(response => {
+//             console.log('response: ', response);
+//             cardInfo.value = response.data
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//         });
+// }
 
-    // axios
-    //     .post(apiUrl, imgUrl.value, {
-    //         headers: {
-    //             "Content-Type": "multipart/form-data",
-    //         },
-    //     })
-    //     .then(function (response) {
-    //         console.log("Response:", response);
-    //     })
-    //     .catch(function (error) {
-    //         console.error("Error:", error);
-    //     });
+// function handleChange(file: any, fileList: any) {
+//     // Handle file change event
+//     if (file.raw) {
+//         const reader = new FileReader();
+//         reader.onload = (e) => {
+//             imageUrl.value = e.target?.result as string;
+//         };
+//         reader.readAsDataURL(file.raw);
+//     }
+// };
 
-    axios.post(apiUrl, { file: imgUrl.value }, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    })
-        .then(response => {
-            console.log('response: ', response);
-            cardInfo.value = response.data
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+// function handleBeforeUpload(file: any) {
+//     imgUrl.value = file
+//     return true; 
+// };
+
+// File Management
+const { files, addFiles, removeFile } = useFileList()
+
+function onInputChange(e) {    
+    addFiles(e.target.files)
+    imgUrl.value = e.target.files[0]
+    e.target.value = null
 }
 
-function handleChange(file: any, fileList: any) {
-    // Handle file change event
-    if (file.raw) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imageUrl.value = e.target?.result as string;
-        };
-        reader.readAsDataURL(file.raw);
-    }
-};
+// Uploader
+const { uploadFiles, uploadFile } = createUploader()
 
-function handleBeforeUpload(file: any) {
-    imgUrl.value = file
-    // Validate file before uploading (if needed)
-    return true; // or false to prevent upload
-};
-
-
-
+function uploadImg() {
+    uploadFile(imgUrl)
+}
 </script>
 
 <template>
@@ -72,7 +72,7 @@ function handleBeforeUpload(file: any) {
                 Chip-based Vietnamese ID Card Extractor v2.0
             </h1>
             <div class="flex gap-4 pt-10 h-[700px]">
-                <div class="flex-1 bg-white p-2 rounded-lg flex items-center justify-center">
+                <!-- <div class="flex-1 bg-white p-2 rounded-lg flex items-center justify-center">
                     <div class="h-[400px] w-500px">
                         <h3 class="pb-2">Upload your image :</h3>
 
@@ -85,8 +85,31 @@ function handleBeforeUpload(file: any) {
                             <el-image v-if="imageUrl" :src="imageUrl" style="max-width: 300px;" />
                         </div>
                     </div>
+                </div> -->
+                <div class="w-520px container p-10">
+                    <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+                        <label class="flex items-center justify-center cursor-pointer" for="file-input">
+                            <span v-if="dropZoneActive">
+                                <span>Drop Them Here</span>
+                                <span class="smaller">to add them</span>
+                            </span>
+                            <span v-else>
+                                <span>Drag Your Files Here</span>
+                                <span class="smaller">
+                                    or <strong><em>click here</em></strong> to select files
+                                </span>
+                            </span>
+
+                            <input type="file" id="file-input" class="hidden" multiple  @change="onInputChange" />
+                            
+                        </label>
+                        <div class="flex gap-2 " v-show="files?.length">
+                            <FilePreview v-for="file of files" :key="file.id" :file="file" @remove="removeFile" />
+                        </div>
+                    </DropZone>
+                    <!-- <button @click.prevent="uploadFiles(files)" class="upload-button">Upload</button> -->
                 </div>
-                <el-button @click="extractId">extractID</el-button>
+                <el-button @click="uploadImg">extractID</el-button>
                 <div class="flex-1 bg-white p-2 rounded-lg">
                     <div class="p-4">
                         <div class="flex justify-end">
@@ -142,24 +165,25 @@ function handleBeforeUpload(file: any) {
     </div>
 </template>
 <style scoped>
-/* .drop-area {
-    border: 2px dashed #ccc;
+.container {
+    background: #ffffff;
+}
+
+.drop-area {
+    width: 100%;
+    max-width: 500px;
+    height: 600px;
+    margin: 0 auto;
     padding: 20px;
-    text-align: center;
+    transition: .2s ease;
+    border: 2px dotted #333;
+    border-radius: 10px;
 }
 
-.file-input {
-  display: none;
+label {
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
 }
 
-.drop-area img {
-    max-width: 100%;
-    max-height: 200px;
-    margin-top: 10px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-} */
 </style>
